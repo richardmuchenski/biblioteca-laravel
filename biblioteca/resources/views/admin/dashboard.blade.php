@@ -1,38 +1,49 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Painel do Administrador') }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Ferramentas de Gerenciamento</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        
-                        <!-- Gerenciar Livros -->
-                        <a href="{{ route('books.index') }}" class="block p-6 bg-gray-100 hover:bg-gray-200 rounded-lg">
-                            <h4 class="font-bold text-lg">Gerenciar Acervo</h4>
-                            <p class="text-sm text-gray-600">Adicionar, editar e excluir livros.</p>
-                        </a>
-
-                        <!-- Gerenciar Usuários -->
-                        <a href="{{ route('users.index') }}" class="block p-6 bg-gray-100 hover:bg-gray-200 rounded-lg">
-                            <h4 class="font-bold text-lg">Gerenciar Usuários</h4>
-                            <p class="text-sm text-gray-600">Editar e excluir usuários existentes.</p>
-                        </a>
-
-                        <!-- Relatórios (funcionalidade futura) -->
-                        <a href="#" class="block p-6 bg-gray-100 hover:bg-gray-200 rounded-lg">
-                            <h4 class="font-bold text-lg">Relatórios</h4>
-                            <p class="text-sm text-gray-600">Visualizar relatórios de empréstimos.</p>
-                        </a>
-
-                    </div>
-                </div>
-            </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Reports</title>
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <style>
+        .report-card { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .table { width: 100%; margin-top: 20px; }
+        .btn-pdf { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Library Reports</h1>
+        <div class="report-card">
+            <h3>Summary</h3>
+            <p><strong>Total Users:</strong> {{ $totalUsers }}</p>
+            <p><strong>Total Books:</strong> {{ $totalBooks }}</p>
+            <p><strong>Active Loans:</strong> {{ $activeLoans }}</p>
+            <p><strong>Overdue Loans:</strong> {{ $overdueLoans }}</p>
+        </div>
+        <div class="report-card">
+            <h3>Recent Loans</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Book</th>
+                        <th>Loan Date</th>
+                        <th>Return Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($recentLoans as $loan)
+                        <tr>
+                            <td>{{ $loan->user->name }}</td>
+                            <td>{{ $loan->book->titulo }}</td>
+                            <td>{{ $loan->loan_date }}</td>
+                            <td>{{ \Carbon\Carbon::parse($loan->loan_date)->addDays(7)->format('d/m/Y') }}</td>
+                            <td>{{ $loan->returned ? 'Returned' : 'Active' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
-</x-app-layout>
+</body>
+</html>

@@ -6,7 +6,8 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\UserController;
-use App\Htpp\Controllers\ProfileController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportsController;
 
 
 // Rota para a página de boas-vindas ou redirecionamento inicial
@@ -36,16 +37,14 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/loans/{loan}/return', [LoanController::class, 'returnBook'])->name('loans.return');
 
     //Rotas administrativas
-    Route::middleware('role:admin')->prefix('admin')->group(function () {
-        
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-
-        // Rotas para gerenciar Livros e Usuários
-        // Nota: as URLs serão /admin/books, /admin/users, etc.
-        Route::resource('books', BookController::class)->except(['show']); // Excluímos a rota 'show' se não for usada
-        Route::resource('users', UserController::class)->except(['show']);
-
-    });
+    Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::resource('books', BookController::class)->except(['show']);
+    Route::resource('users', UserController::class)->except(['show']);
+    Route::get('/admin/users/create', [UserController::class, 'create'])->name('users.create')->middleware(['auth', 'role:admin']);
+    Route::get('/reports', [ReportsController::class, 'index'])->name('admin.reports.index');
+    Route::get('/reports/pdf', [ReportsController::class, 'generatePDF'])->name('admin.reports.pdf');
+    Route::get('/reports/excel', [ReportsController::class, 'generateExcel'])->name('admin.reports.excel');});
 });
 
 // Inclui as rotas de autenticação (login, registro, logout, etc.)

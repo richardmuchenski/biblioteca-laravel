@@ -55,8 +55,8 @@
                                                 <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $loan->book->titulo }}</td>
                                                 <td class="px-6 py-4 text-sm text-gray-500">{{ \Carbon\Carbon::parse($loan->loan_date)->format('d/m/Y') }}</td>
                                                 <td class="px-6 py-4 text-sm text-gray-500">
-                                                    {{-- Exemplo: Adiciona 15 dias à data de empréstimo --}}
-                                                    {{ \Carbon\Carbon::parse($loan->loan_date)->addDays(15)->format('d/m/Y') }}
+                                                    {{-- Exemplo: Adiciona 7 dias à data de empréstimo --}}
+                                                    {{ \Carbon\Carbon::parse($loan->loan_date)->addDays(7)->format('d/m/Y') }}
                                                 </td>
                                                 <td class="px-6 py-4 text-sm">
                                                     {{-- Formulário com o botão "Devolver" --}}
