@@ -1,59 +1,46 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Registro de Empréstimos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="container mt-5">
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Pegar um Livro Emprestado') }}
+        </h2>
+    </x-slot>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Registro de Empréstimos</h1>
-        <a href="{{ route('loans.create') }}" class="btn btn-primary">Registrar Novo Empréstimo</a>
-    </div>
-
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Livros Disponíveis no Acervo</h3>
+                    
+                    {{-- Change $books to $loans if you prefer, but be consistent --}}
+                    @if($books->isEmpty())
+                        <p>Não há livros disponíveis para empréstimo no momento.</p>
+                    @else
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {{-- CORRECTION IS HERE: from $loans as $loan TO $books as $book --}}
+                            @foreach($books as $book)
+                                <div class="border rounded-lg p-4 flex flex-col justify-between shadow">
+                                    <div>
+                                        @if($book->capa_url)
+                                            <img src="{{ $book->capa_url }}" alt="Capa de {{ $book->titulo }}" class="w-full h-48 object-cover mb-4 rounded">
+                                        @endif
+                                        <h4 class="font-bold">{{ $book->titulo }}</h4>
+                                        <p class="text-sm text-gray-600">{{ $book->autor }}</p>
+                                        <p class="text-xs text-gray-500 mt-2">Estoque: {{ $book->quantidade_estoque }}</p>
+                                    </div>
+                                    
+                                    <form action="{{ route('loans.store') }}" method="POST" class="mt-4">
+                                        @csrf
+                                        <input type="hidden" name="book_isbn" value="{{ $book->isbn }}">
+                                        <button type="submit" class="w-full px-4 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-500">
+                                            Pegar Emprestado
+                                        </button>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
-    @endif
-
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Usuário (CPF)</th>
-                <th scope="col">Livro (ISBN)</th>
-                <th scope="col">Data do Empréstimo</th>
-                <th scope="col">Status</th>
-                <th scope="col">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{-- O Controller precisa enviar uma variável $loans com os dados --}}
-            @foreach ($loans as $loan)
-                <tr>
-                    <th scope="row">{{ $loan->id }}</th>
-                    <td>{{ $loan->user_cpf }}</td>
-                    <td>{{ $loan->book_isbn }}</td>
-                    <td>{{ \Carbon\Carbon::parse($loan->loan_date)->format('d/m/Y') }}</td>
-                    <td>
-                        @if($loan->returned)
-                            <span class="badge bg-success">Devolvido</span>
-                        @else
-                            <span class="badge bg-warning text-dark">Emprestado</span>
-                        @endif
-                    </td>
-                    <td>
-                        {{-- Aqui poderia ter um botão para registrar a devolução --}}
-                        @if(!$loan->returned)
-                            <a href="#" class="btn btn-sm btn-info">Devolver</a>
-                        @endif
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-</body>
-</html>
+    </div>
+</x-app-layout>

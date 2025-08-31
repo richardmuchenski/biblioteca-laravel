@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->string('cpf', 15)->primary();
-            $table->string('nome', 100)->nullable();
+            $table->string('name', 100)->nullable();
             $table->string('email', 100)->nullable();
-            $table->string('senha', 255)->nullable();
+            $table->string('password', 255)->nullable();
             $table->string('role', 20)->nullable();
             $table->string('telefone', 50)->nullable();
             $table->timestamps();

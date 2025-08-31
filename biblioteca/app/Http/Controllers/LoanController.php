@@ -49,4 +49,28 @@ class LoanController extends Controller
 
         return redirect()->route('dashboard')->with('success', 'Livro emprestado com sucesso!');
     }
+
+    public function returnBook(Loan $loan)
+    {
+        // Verifica se o empréstimo pertence ao usuário logado
+        if ($loan->user_cpf !== Auth::user()->cpf) {
+            return back()->with('error', 'Você não tem permissão para devolver este livro.');
+        }
+
+        // Verifica se o livro já foi devolvido
+        if ($loan->returned) {
+            return back()->with('error', 'Este livro já foi devolvido.');
+        }
+
+        // Marca o empréstimo como devolvido
+        $loan->returned = true;
+        $loan->return_date = now(); // Define a data de devolução como a data/hora atual
+        $loan->save();
+
+        // Aumenta 1 unidade no estoque do livro
+        $book = Book::find($loan->book_isbn);
+        $book->increment('quantidade_estoque');
+
+        return redirect()->route('dashboard')->with('success', 'Livro devolvido com sucesso!');
+    }   
 }

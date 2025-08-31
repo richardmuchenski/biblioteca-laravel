@@ -8,7 +8,7 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    /
+    
     public function index(): View
     {
         // Pega o usuário que está atualmente logado

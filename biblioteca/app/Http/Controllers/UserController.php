@@ -26,16 +26,16 @@ class UserController extends Controller
         try {
             $validated = $request->validate([
                 'cpf' => 'required|string|max:15|unique:users,cpf',
-                'nome' => 'nullable|string|max:100',
+                'name' => 'nullable|string|max:100',
                 'email' => 'nullable|email|max:100|unique:users,email',
-                'senha' => 'nullable|string|max:255',
+                'password' => 'nullable|string|max:255',
                 'role' => 'nullable|string|max:20',
                 'telefone' => 'nullable|string|max:50',
             ]);
-            if (!empty($validated['senha'])) {
-                $validated['senha'] = Hash::make($validated['senha']);
+            if (!empty($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
             } else {
-                unset($validated['senha']); // Remove a senha se estiver vazia
+                unset($validated['password']); // Remove a password se estiver vazia
             }
             User::create($validated);
             \Log::info('User created: cpf=' . $validated['cpf']);
@@ -43,6 +43,54 @@ class UserController extends Controller
         } catch (\Exception $e) {
             \Log::error('Error creating user: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Falha ao criar usuário: ' . $e->getMessage()]);
+        }
+    }
+
+    public function edit($cpf)
+    {
+        $user = User::findOrFail($cpf);
+        return view('users.edit', ['user' => $user]);
+    }
+
+    public function update(Request $request, $cpf)
+    {
+        //Método para atualizar usuário.
+        \Log::info('PUT /users/' . $cpf, $request->all());
+        try {
+            $user = User::findOrFail($cpf);
+            $validated = $request->validate([
+                'name' => 'nullable|string|max:100',
+                'email' => 'nullable|email|max:100|unique:users,email,' . $cpf . ',cpf',
+                'password' => 'nullable|string|max:255',
+                'role' => 'nullable|string|max:20',
+                'telefone' => 'nullable|string|max:50',
+            ]);
+            if (!empty($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            } else {
+                unset($validated['password']); // Remove a password se estiver vazia
+            }
+            $user->update($validated);
+            \Log::info('User updated: cpf=' . $cpf);
+            return redirect()->route('users.index')->with('success', 'Usuário atualizado com sucesso!');
+        } catch (\Exception $e) {
+            \Log::error('Error updating user: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Falha ao atualizar usuário: ' . $e->getMessage()]);
+        }
+    }
+
+    public function destroy($cpf)
+    {
+        //Método para deletar usuário.
+        \Log::info('DELETE /users/' . $cpf);
+        try {
+            $user = User::findOrFail($cpf);
+            $user->delete();
+            \Log::info('User deleted: cpf=' . $cpf);
+            return redirect()->route('users.index')->with('success', 'Usuário deletado com sucesso!');
+        } catch (\Exception $e) {
+            \Log::error('Error deleting user: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Falha ao deletar usuário: ' . $e->getMessage()]);
         }
     }
 }

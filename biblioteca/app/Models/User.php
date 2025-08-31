@@ -15,15 +15,20 @@ class User extends Authenticatable
     public $incrementing = false;
     protected $keyType = 'string';
     
-    protected $fillable = ['cpf', 'nome', 'email', 'senha', 'role', 'telefone'];
+    protected $fillable = ['cpf', 'name', 'email', 'password', 'role', 'telefone'];
 
     protected $hidden = [
-        'senha',
+        'password',
     ];
 
     public function loans()
     {
         return $this->hasMany(Loan::class, 'user_cpf', 'cpf');
+    }
+
+    public function getAuthPassword()
+    {
+        return $this->password;
     }
 
 }

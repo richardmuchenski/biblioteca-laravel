@@ -31,17 +31,17 @@ class RegisteredUserController extends Controller
     {
        /* $request->validate([
             'cpf' => ['required', 'string', 'max:15', 'unique:'.User::class],
-            'nome' => ['required', 'string', 'max:100'],
+            'name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:100', 'unique:'.User::class],
-            'senha' => ['required', 'string', 'min:8', 'confirmed', Rules\Password::defaults()], 
+            'password' => ['required', 'string', 'min:8', 'confirmed', Rules\Password::defaults()], 
             'telefone' => ['nullable', 'string', 'max:50'],
         ]);
         */
          $user = User::create([
             'cpf' => $request->cpf,
-            'nome' => $request->nome,
+            'name' => $request->name,
             'email' => $request->email,
-            'senha' => Hash::make($request->senha), // Criptografa a senha
+            'password' => Hash::make($request->password), // Criptografa a password
             'telefone' => $request->telefone,
             
             
