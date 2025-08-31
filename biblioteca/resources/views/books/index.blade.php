@@ -18,9 +18,10 @@
         </div>
     @endif
 
-    <table class="table table-striped table-hover">
+    <table class="table table-striped table-hover align-middle">
         <thead class="table-dark">
             <tr>
+                <th scope="col">Capa</th>
                 <th scope="col">ISBN</th>
                 <th scope="col">Título</th>
                 <th scope="col">Autor</th>
@@ -29,16 +30,23 @@
             </tr>
         </thead>
         <tbody>
-            {{-- O Controller precisa enviar uma variável $books com os dados --}}
-            @foreach ($books as $book)
+            @forelse ($books as $book)
                 <tr>
+                    <td>
+                        {{-- Verifica se existe uma URL de capa --}}
+                        @if($book->capa_url)
+                            <img src="{{ $book->capa_url }}" alt="Capa do livro {{ $book->titulo }}" style="width: 50px; height: auto; border-radius: 4px;">
+                        @else
+                            {{-- Mostra um texto se não houver imagem --}}
+                            <span class="text-muted">Sem imagem</span>
+                        @endif
+                    </td>
                     <th scope="row">{{ $book->isbn }}</th>
                     <td>{{ $book->titulo }}</td>
                     <td>{{ $book->autor }}</td>
                     <td>{{ $book->quantidade_estoque }}</td>
                     <td>
-                         <a href="{{ route('books.edit', $book->isbn) }}" class="btn btn-sm btn-warning">Editar</a>
-
+                        <a href="{{ route('books.edit', $book->isbn) }}" class="btn btn-sm btn-warning">Editar</a>
                         <form action="{{ route('books.destroy', $book->isbn) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
@@ -48,7 +56,11 @@
                         </form>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="6" class="text-center">Nenhum livro encontrado.</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 

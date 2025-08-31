@@ -1,69 +1,52 @@
 <?php
+
 namespace App\Http\Controllers;
+
+use App\Models\Book;
 use App\Models\Loan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoanController extends Controller
 {
-    
-    public function index()
-    {
-        $loans = Loan::paginate(15); // Para um sistema real, use paginação: Loan::paginate(15);
-        return view('loans.index', ['loans' => $loans]);
-    }
-    
+    /**
+     * Mostra a página com livros disponíveis para empréstimo.
+     */
     public function create()
     {
-        return view('loans.create');
+        // Busca apenas os livros que têm mais de 0 unidades no estoque
+        $availableBooks = Book::where('quantidade_estoque', '>', 0)->get();
+        
+        return view('loans.create', ['books' => $availableBooks]);
     }
 
+    /**
+     * Registra um novo empréstimo no banco de dados.
+     */
     public function store(Request $request)
     {
-        
-        $validated = $request->validate([
-            'loan_date' => 'required|date',
-            'return_date' => 'nullable|date',
-            'user_cpf' => 'required|string|exists:users,cpf',
-            'book_isbn' => 'required|string|exists:books,isbn', 
+        $request->validate([
+            'book_isbn' => ['required', 'string', 'exists:books,isbn'],
         ]);
 
-        Loan::create($validated);
+        $book = Book::find($request->book_isbn);
 
-        // Redirecionando a página de listagem de empréstimos com mensagem de sucesso
-        return redirect()->route('loans.index')->with('success', 'Empréstimo registrado com sucesso!');
-    }
+        // Verificação extra para garantir que o livro ainda está disponível
+        if ($book->quantidade_estoque < 1) {
+            return back()->with('error', 'Desculpe, este livro não está mais disponível no estoque.');
+        }
 
-    public function show($id)
-    {
-        $loan = Loan::findOrFail($id);
-        return view('loans.show', ['loan' => $loan]);
-    }
-
-    public function edit($id) {
-        $loan = Loan::findOrFail($id);
-        return view('loans.edit', ['loan' => $loan]);
-    }
-
-    public function update(Request $request, $id) {
-        $loan = Loan::findOrFail($id);
-
-        $validated = $request->validate([
-            'loan_date' => 'required|date',
-            'return_date' => 'nullable|date',
-            'user_cpf' => 'required|string|exists:users,cpf',
-            'book_isbn' => 'required|string|exists:books,isbn', 
-            'returned' => 'required|boolean',
+        // Cria o registro do empréstimo
+        Loan::create([
+            'user_cpf' => Auth::user()->cpf, // Pega o CPF do usuário logado
+            'book_isbn' => $request->book_isbn,
+            'loan_date' => now(), // Define a data do empréstimo como a data/hora atual
+            'returned' => false,
         ]);
 
-        $loan->update($validated);
+        // Diminui 1 unidade do estoque do livro
+        $book->decrement('quantidade_estoque');
 
-        return redirect()->route('loans.index')->with('success', 'Empréstimo atualizado com sucesso!');
+        return redirect()->route('dashboard')->with('success', 'Livro emprestado com sucesso!');
     }
-
-    public function destroy($id) {
-        $loan = Loan::findOrFail($id);
-        $loan->delete();
-        return redirect()->route('loans.index')->with('success', 'Empréstimo deletado com sucesso!');
-    }   
-    // Os outros métodos (show, update, destroy) podem ser mantidos ou ajustados depois
 }
