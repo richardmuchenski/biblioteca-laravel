@@ -16,6 +16,11 @@ class BookController extends Controller
         return view('books.create');
     }
 
+    public function edit(Book $book)
+    {
+        return view('books.edit', compact('book'));
+    }
+
     public function store(Request $request)
     {
         
@@ -26,6 +31,11 @@ class BookController extends Controller
             'categoria' => 'required|string|max:50',
             'quantidade_estoque' => 'required|integer|min:0', 
             'capa_url' => 'nullable|string|max:200',
+            'isbn' => 'required|string|max:50|unique:books,isbn',
+            'last_used_at' => 'nullable|date',
+            'expires_at' => 'nullable|date',
+            'created_at' => 'nullable|date',
+            'updated_at' => 'nullable|date',
         ]);
 
         Book::create($validatedData);
@@ -40,11 +50,6 @@ class BookController extends Controller
         return view('books.show', ['book' => $book]);
     }
     
-    public function edit($id) {
-        $book = Book::findOrFail($id);
-        return view('books.edit', ['book' => $book]);
-    }
-
     public function update(Request $request, $id) {
         $book = Book::findOrFail($id);
 

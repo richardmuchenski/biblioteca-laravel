@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('book_isbn', 50);
             $table->foreign('user_cpf')->references('cpf')->on('users')->onDelete('cascade');
             $table->foreign('book_isbn')->references('isbn')->on('books')->onDelete('cascade');
+            $table->timestamp('last_used_at')->nullable();
+            $table->timestamp('expires_at')->nullable()->index();
+            $table->timestamps();
         });
     }
 

@@ -12,7 +12,6 @@
         <a href="{{ route('users.create') }}" class="btn btn-primary">Cadastrar Novo Usuário</a>
     </div>
 
-    {{-- Exibição de mensagem de sucesso --}}
     @if(session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
@@ -26,26 +25,26 @@
                 <th scope="col">Nome</th>
                 <th scope="col">Email</th>
                 <th scope="col">Telefone</th>
-                <th scope="col">Senha</th>
                 <th scope="col">Ações</th>
             </tr>
         </thead>
         <tbody>
-            {{-- O Controller precisa enviar uma variável $users com os dados --}}
-            @foreach ($users as $user)
+            @forelse ($users as $user)
                 <tr>
                     <th scope="row">{{ $user->cpf }}</th>
                     <td>{{ $user->nome }}</td>
                     <td>{{ $user->email }}</td>
                     <td>{{ $user->telefone }}</td>
-                    <td>{{ $user->senha }}</td>
                     <td>
-                        {{-- Botões para editar e deletar (funcionalidades futuras) --}}
                         <a href="#" class="btn btn-sm btn-warning">Editar</a>
                         <a href="#" class="btn btn-sm btn-danger">Excluir</a>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center">Nenhum usuário encontrado.</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 

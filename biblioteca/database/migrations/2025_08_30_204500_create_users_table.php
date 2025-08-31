@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('senha', 255)->nullable();
             $table->string('role', 20)->nullable();
             $table->string('telefone', 50)->nullable();
+            $table->timestamps();
         });
     }
 

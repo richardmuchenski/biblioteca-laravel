@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('categoria', 50)->nullable();
             $table->integer('quantidade_estoque')->nullable();
             $table->string('capa_url', 200)->nullable();
+            $table->timestamp('last_used_at')->nullable();
+            $table->timestamp('expires_at')->nullable()->index();
+            $table->timestamps();
         });
     }
 
