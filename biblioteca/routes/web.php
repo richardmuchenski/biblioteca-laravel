@@ -1,25 +1,22 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\UserController;
 
-// USERS
-Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-Route::post('/users', [UserController::class, 'store'])->name('users.store');
-
-// BOOKS
-Route::get('/books/create', [BookController::class, 'create'])->name('books.create');
-Route::post('/books', [BookController::class, 'store'])->name('books.store');
-
-// LOANS
-Route::get('/loans/create', [LoanController::class, 'create'])->name('loans.create');
-Route::post('/loans', [LoanController::class, 'store'])->name('loans.store');
-Route::get('/loans/{id}', [LoanController::class, 'show'])->name('loans.show');
-Route::put('/loans/{id}', [LoanController::class, 'update'])->name('loans.update');
-Route::delete('/loans/{id}', [LoanController::class, 'destroy'])->name('loans.destroy');
-
-// Rota inicial (página inicial)
+// A rota principal  vai para a tela de login (se não estiver logado)
 Route::get('/', function () {
-    return view('welcome');
+    // Se o usuário já estiver logado, vai para /books. Senão, vai para /login.
+    return redirect()->route('books.index');
+})->middleware(['auth']); // O middleware 'auth' força o login
+
+// Este grupo de rotas SÓ PODE SER ACESSADO por usuários autenticados.
+Route::middleware('auth')->group(function () {
+    Route::resource('users', UserController::class);
+    Route::resource('books', BookController::class);
+    Route::resource('loans', LoanController::class);
 });
+
+// Inclui as rotas geradas pelo Breeze (/login, /register, /logout, etc.)
+require __DIR__.'/auth.php';

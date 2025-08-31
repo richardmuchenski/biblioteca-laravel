@@ -1,74 +1,71 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Book;
 use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
+    public function index()
+    {
+        $books = Book::all();
+        return view('books.index', ['books' => $books]);
+    }
+
     public function create()
-{
-    return view('books.create'); // books
-}
+    {
+        return view('books.create');
+    }
+
     public function store(Request $request)
     {
+        
         $validatedData = $request->validate([
-            'titulo' => 'required|string|max:255',
-            'autor' => 'required|string|max:255',
-            'editora' => 'required|string|max:255',
-            'ano_publicacao' => 'required|integer|min:0',
-            'isbn' => 'required|string|size:13|unique:books',
-            'categoria' => 'required|string|max:100',
-            'quantidade_disponivel' => 'required|integer|min:0'
+            'titulo' => 'required|string|max:50',
+            'autor' => 'required|string|max:50',
+            'ano_publicado' => 'required|integer', 
+            'categoria' => 'required|string|max:50',
+            'quantidade_estoque' => 'required|integer|min:0', 
+            'capa_url' => 'nullable|string|max:200',
         ]);
 
-        $book = Book::create($validatedData);
+        Book::create($validatedData);
 
-        return response()->json($book, 201);
+        // Redireciona para a página de listagem
+        return redirect()->route('books.index')->with('success', 'Livro cadastrado com sucesso!');
+    }
+    
+    public function show($id)
+    {
+        $book = Book::findOrFail($id);
+        return view('books.show', ['book' => $book]);
+    }
+    
+    public function edit($id) {
+        $book = Book::findOrFail($id);
+        return view('books.edit', ['book' => $book]);
     }
 
-    public function show($isbn)
-    {
-        $book = Book::find($isbn);
-
-        if (!$book) {
-            return response()->json(['message' => 'Livro não encontrado'], 404);
-        }
-
-        return response()->json($book);
-    }
-
-    public function update(Request $request, $isbn)
-    {
-        $book = Book::find($isbn);
-
-        if (!$book) {
-            return response()->json(['message' => 'Livro não encontrado'], 404);
-        }
+    public function update(Request $request, $id) {
+        $book = Book::findOrFail($id);
 
         $validatedData = $request->validate([
-            'titulo' => 'sometimes|required|string|max:255',
-            'autor' => 'sometimes|required|string|max:255',
-            'editora' => 'sometimes|required|string|max:255',
-            'ano_publicacao' => 'sometimes|required|integer|min:0',
-            'categoria' => 'sometimes|required|string|max:100',
-            'quantidade_disponivel' => 'sometimes|required|integer|min:0'
+            'titulo' => 'required|string|max:50',
+            'autor' => 'required|string|max:50',
+            'ano_publicado' => 'required|integer', 
+            'categoria' => 'required|string|max:50',
+            'quantidade_estoque' => 'required|integer|min:0', 
+            'capa_url' => 'nullable|string|max:200',
         ]);
 
-        $book = Book::create($validated);
-        return response()->json($book, 201);
+        $book->update($validatedData);
+
+        return redirect()->route('books.index')->with('success', 'Livro atualizado com sucesso!');
     }
-    public function destroy($isbn)
-    {
-        $book = Book::find($isbn);
 
-        if (!$book) {
-            return response()->json(['message' => 'Livro não encontrado'], 404);
-        }
-
+    public function destroy($id) {
+        $book = Book::findOrFail($id);
         $book->delete();
-
-        return response()->json(['message' => 'Livro deletado com sucesso']);
+        return redirect()->route('books.index')->with('success', 'Livro deletado com sucesso!');
     }
+    // Os outros métodos (show, update, destroy) podem ser mantidos ou ajustados depois
 }

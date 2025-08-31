@@ -1,64 +1,69 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Loan;
 use Illuminate\Http\Request;
 
 class LoanController extends Controller
 {
+    
+    public function index()
+    {
+        $loans = Loan::paginate(15); // Para um sistema real, use paginação: Loan::paginate(15);
+        return view('loans.index', ['loans' => $loans]);
+    }
+    
     public function create()
-{
-    return view('loans.create'); // loans
-}
+    {
+        return view('loans.create');
+    }
+
     public function store(Request $request)
     {
+        
         $validated = $request->validate([
             'loan_date' => 'required|date',
             'return_date' => 'nullable|date',
             'user_cpf' => 'required|string|exists:users,cpf',
-            'book_ISBN' => 'required|string|exists:books,isbn',
+            'book_isbn' => 'required|string|exists:books,isbn', 
         ]);
 
-        $loan = Loan::create($validated);
-        return response()->json($loan, 201);
+        Loan::create($validated);
+
+        // Redirecionando a página de listagem de empréstimos com mensagem de sucesso
+        return redirect()->route('loans.index')->with('success', 'Empréstimo registrado com sucesso!');
     }
 
     public function show($id)
     {
-        $loan = Loan::with(['user', 'book'])->findOrFail($id);
-        return response()->json($loan);
+        $loan = Loan::findOrFail($id);
+        return view('loans.show', ['loan' => $loan]);
     }
 
-    public function update(Request $request, $id)
-    {
-        $loan = Loan::find($id);
-        
-        if (!$loan) {
-            return response()->json(['message' => 'Empréstimo não encontrado'], 404);
-        }
-        $validatedData = $request->validate([
-            'loan_date' => 'sometimes|required|date',
-            'return_date' => 'sometimes|nullable|date',
-            'returned' => 'sometimes|required|boolean',
-            'user_cpf' => 'sometimes|required|string|exists:users,cpf',
-            'book_ISBN' => 'sometimes|required|string|exists:books,isbn',
+    public function edit($id) {
+        $loan = Loan::findOrFail($id);
+        return view('loans.edit', ['loan' => $loan]);
+    }
+
+    public function update(Request $request, $id) {
+        $loan = Loan::findOrFail($id);
+
+        $validated = $request->validate([
+            'loan_date' => 'required|date',
+            'return_date' => 'nullable|date',
+            'user_cpf' => 'required|string|exists:users,cpf',
+            'book_isbn' => 'required|string|exists:books,isbn', 
+            'returned' => 'required|boolean',
         ]);
 
-        $loan->update($validatedData);
+        $loan->update($validated);
 
-        return response()->json($loan);
+        return redirect()->route('loans.index')->with('success', 'Empréstimo atualizado com sucesso!');
     }
 
-    public function destroy($id)
-    {
-        $loan = Loan::find($id);
-
-        if (!$loan) {
-            return response()->json(['message' => 'Empréstimo não encontrado'], 404);
-        }
-
+    public function destroy($id) {
+        $loan = Loan::findOrFail($id);
         $loan->delete();
-        return response()->json(['message' => 'Empréstimo deletado com sucesso']);
-    }
+        return redirect()->route('loans.index')->with('success', 'Empréstimo deletado com sucesso!');
+    }   
+    // Os outros métodos (show, update, destroy) podem ser mantidos ou ajustados depois
 }

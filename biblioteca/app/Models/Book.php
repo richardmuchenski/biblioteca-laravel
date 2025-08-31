@@ -16,11 +16,11 @@ class Book extends Model
     protected $fillable = [
         'titulo',
         'autor',
-        'editora',
-        'ano_publicacao',
+        'ano_publicado',
         'isbn',
         'categoria',
-        'quantidade_disponivel'
+        'quantidade_estoque',
+        'capa_url'
     ];
 
     // Relação com Empréstimos
@@ -28,10 +28,5 @@ class Book extends Model
     {
         return $this->hasMany(Loan::class, 'book_isbn', 'isbn');
     }
-
-    public function create()
-{
-    return view('books.create'); // books
-}
 
 }

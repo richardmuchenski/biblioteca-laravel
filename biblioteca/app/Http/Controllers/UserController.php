@@ -1,75 +1,48 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    
+    public function index()
+    {
+        $users = User::all();
+        return view('users.index', ['users' => $users]);
+    }
 
     public function create()
-{
-    return view('users.create'); // users
-}
+    {
+        return view('users.create');
+    }
+
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'nome' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'senha' => 'required|string|min:6',
-            'telefone' => 'nullable|string|max:15',
-            'cpf' => 'required|string|size:11|unique:users',
-            'role' => 'required|string|in:admin,user'
-        ]);
-
-        $user = User::create($validatedData);
-
-        return response()->json($user, 201);
-    }
-
-    public function show($cpf)
-    {
-        $user = User::find($cpf);
-
-        if (!$user) {
-            return response()->json(['message' => 'Usuário não encontrado'], 404);
+        //Método store.
+        \Log::info('POST /users/create', $request->all());
+        try {
+            $validated = $request->validate([
+                'cpf' => 'required|string|max:15|unique:users,cpf',
+                'nome' => 'nullable|string|max:100',
+                'email' => 'nullable|email|max:100|unique:users,email',
+                'senha' => 'nullable|string|max:255',
+                'role' => 'nullable|string|max:20',
+                'telefone' => 'nullable|string|max:50',
+            ]);
+            if (!empty($validated['senha'])) {
+                $validated['senha'] = Hash::make($validated['senha']);
+            } else {
+                unset($validated['senha']); // Remove a senha se estiver vazia
+            }
+            User::create($validated);
+            \Log::info('User created: cpf=' . $validated['cpf']);
+            return redirect()->route('users.index')->with('success', 'Usuário criado com sucesso!');
+        } catch (\Exception $e) {
+            \Log::error('Error creating user: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Falha ao criar usuário: ' . $e->getMessage()]);
         }
-
-        return response()->json($user);
-    }
-
-    public function update(Request $request, $cpf)
-    {
-        $user = User::find($cpf);
-
-        if (!$user) {
-            return response()->json(['message' => 'Usuário não encontrado'], 404);
-        }
-
-        $validatedData = $request->validate([
-            'nome' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $cpf . ',cpf',
-            'senha' => 'sometimes|required|string|min:6',
-            'telefone' => 'nullable|string|max:15',
-            'role' => 'sometimes|required|string|in:admin,user'
-        ]);
-
-        $user->update($validatedData);
-
-        return response()->json($user);
-    }
-
-    public function destroy($cpf)
-    {
-        $user = User::find($cpf);
-
-        if (!$user) {
-            return response()->json(['message' => 'Usuário não encontrado'], 404);
-        }
-
-        $user->delete();
-
-        return response()->json(['message' => 'Usuário deletado com sucesso']);
     }
 }

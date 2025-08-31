@@ -9,12 +9,14 @@ class Loan extends Model
 {
     use HasFactory;
 
+    public $timestamps = false; // Desativa timestamps automáticos
+
     protected $fillable = [
         'user_cpf',
         'book_isbn',
-        'data_emprestimo',
-        'data_devolucao',
-        'status'
+        'loan_date',
+        'return_date',
+        'returned'
     ];
 
     // Relação com Usuário
@@ -28,10 +30,5 @@ class Loan extends Model
     {
         return $this->belongsTo(Book::class, 'book_isbn', 'isbn');
     }
-
-    public function create()
-{
-    return view('loans.create'); // loans
-}
 
 }

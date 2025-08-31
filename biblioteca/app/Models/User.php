@@ -1,39 +1,29 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundatdion\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+Use Laravel\Sanctum\HasApiTokens;
 
-class User extends Model
+class User extends Authenticatable
 {
+
+    use HasApiTokens, HasFactory, Notifiable;
+
+    protected $primaryKey = 'cpf';
+    public $incrementing = false;
+    protected $keyType = 'string';
     
-    use HasFactory;
+    protected $fillable = ['cpf', 'nome', 'email', 'senha', 'role', 'telefone'];
 
-    protected $primaryKey = 'cpf'; // Define cpf como chave primária
-    protected $keyType = 'string'; // Define o tipo da chave primária como string
-    public $incrementing = false; // Indica que a chave primária não é auto-incrementável
-
-    protected $fillable = [
-        'nome',
-        'email',
+    protected $hidden = [
         'senha',
-        'telefone',
-        'cpf',
-        'role'        
     ];
 
-
-    //Relação com Empréstimos
-    public function emprestimos()
+    public function loans()
     {
-        return $this->hasMany(Emprestimo::class, 'user_cpf', 'cpf');
+        return $this->hasMany(Loan::class, 'user_cpf', 'cpf');
     }
 
-    public function create()
-{
-    return view('users.create'); // users
 }
-
-}
-

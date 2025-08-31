@@ -2,34 +2,58 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Registrar Empréstimo</title>
+    <title>Registro de Empréstimos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="container mt-5">
 
-    <h1>Registrar Empréstimo</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Registro de Empréstimos</h1>
+        <a href="{{ route('loans.create') }}" class="btn btn-primary">Registrar Novo Empréstimo</a>
+    </div>
 
-    <form action="{{ route('loans.store') }}" method="POST">
-        @csrf
-        <div class="mb-3">
-            <label>CPF do Usuário:</label>
-            <input type="text" name="user_cpf" class="form-control">
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
         </div>
-        <div class="mb-3">
-            <label>ISBN do Livro:</label>
-            <input type="text" name="book_ISBN" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label>Data do Empréstimo:</label>
-            <input type="date" name="loan_date" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label>Data de Devolução:</label>
-            <input type="date" name="return_date" class="form-control">
-        </div>
+    @endif
 
-        <button type="submit" class="btn btn-primary">Registrar</button>
-    </form>
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Usuário (CPF)</th>
+                <th scope="col">Livro (ISBN)</th>
+                <th scope="col">Data do Empréstimo</th>
+                <th scope="col">Status</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{-- O Controller precisa enviar uma variável $loans com os dados --}}
+            @foreach ($loans as $loan)
+                <tr>
+                    <th scope="row">{{ $loan->id }}</th>
+                    <td>{{ $loan->user_cpf }}</td>
+                    <td>{{ $loan->book_isbn }}</td>
+                    <td>{{ \Carbon\Carbon::parse($loan->loan_date)->format('d/m/Y') }}</td>
+                    <td>
+                        @if($loan->returned)
+                            <span class="badge bg-success">Devolvido</span>
+                        @else
+                            <span class="badge bg-warning text-dark">Emprestado</span>
+                        @endif
+                    </td>
+                    <td>
+                        {{-- Aqui poderia ter um botão para registrar a devolução --}}
+                        @if(!$loan->returned)
+                            <a href="#" class="btn btn-sm btn-info">Devolver</a>
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 
 </body>
 </html>
